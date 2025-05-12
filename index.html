@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nokia Ball Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; margin: auto; background: #000; }
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .btn {
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="leftBtn" class="btn">⬅️</button>
+    <button id="rightBtn" class="btn">➡️</button>
+  </div>
+
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: 480,
+      height: 320,
+      backgroundColor: '#000000',
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 },
+          debug: false
+        }
+      },
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      }
+    };
+
+    const game = new Phaser.Game(config);
+
+    let ball, paddle, cursors;
+    let moveLeft = false;
+    let moveRight = false;
+
+    function preload() {
+      this.load.image('ball', 'https://labs.phaser.io/assets/sprites/shinyball.png');
+      this.load.image('paddle', 'https://labs.phaser.io/assets/sprites/platform.png');
+    }
+
+    function create() {
+      ball = this.physics.add.image(240, 160, 'ball').setCollideWorldBounds(true).setBounce(1);
+      ball.setVelocity(150, 150);
+
+      paddle = this.physics.add.image(240, 310, 'paddle').setImmovable(true);
+      paddle.displayWidth = 100;
+      paddle.setCollideWorldBounds(true);
+
+      this.physics.add.collider(ball, paddle);
+
+      cursors = this.input.keyboard.createCursorKeys();
+
+      document.getElementById('leftBtn').addEventListener('touchstart', () => moveLeft = true);
+      document.getElementById('leftBtn').addEventListener('touchend', () => moveLeft = false);
+
+      document.getElementById('rightBtn').addEventListener('touchstart', () => moveRight = true);
+      document.getElementById('rightBtn').addEventListener('touchend', () => moveRight = false);
+    }
+
+    function update() {
+      if (cursors.left.isDown || moveLeft) {
+        paddle.setVelocityX(-300);
+      } else if (cursors.right.isDown || moveRight) {
+        paddle.setVelocityX(300);
+      } else {
+        paddle.setVelocityX(0);
+      }
+
+      if (ball.y > 320) {
+        ball.setPosition(240, 160);
+        ball.setVelocity(150, 150);
+        alert('Game Over!');
+      }
+    }
+  </script>
+</body>
+</html>
