@@ -25,6 +25,20 @@
       border: none;
       border-radius: 50%;
     }
+    .score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      color: white;
+    }
+    .level {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -32,6 +46,8 @@
     <button id="leftBtn" class="btn">⬅️</button>
     <button id="rightBtn" class="btn">➡️</button>
   </div>
+  <div class="score">Score: 0</div>
+  <div class="level">Level: 1</div>
 
   <script>
     const config = {
@@ -58,6 +74,10 @@
     let ball, paddle, cursors;
     let moveLeft = false;
     let moveRight = false;
+    let score = 0;
+    let level = 1;
+    let lives = 3;
+    let bounceCount = 0;
 
     function preload() {
       this.load.image('ball', 'https://labs.phaser.io/assets/sprites/shinyball.png');
@@ -81,6 +101,8 @@
 
       document.getElementById('rightBtn').addEventListener('touchstart', () => moveRight = true);
       document.getElementById('rightBtn').addEventListener('touchend', () => moveRight = false);
+
+      updateUI();
     }
 
     function update() {
@@ -93,10 +115,47 @@
       }
 
       if (ball.y > 320) {
-        ball.setPosition(240, 160);
-        ball.setVelocity(150, 150);
-        alert('Game Over!');
+        lives--;
+        if (lives <= 0) {
+          alert('Game Over!');
+          resetGame();
+        } else {
+          ball.setPosition(240, 160);
+          ball.setVelocity(150, 150);
+        }
       }
+
+      // Ball bounces and increase speed after a certain count
+      if (ball.body.velocity.x !== 0 && ball.body.velocity.y !== 0) {
+        bounceCount++;
+        if (bounceCount >= 10) {
+          bounceCount = 0;
+          level++;
+          ball.setVelocity(ball.body.velocity.x * 1.1, ball.body.velocity.y * 1.1); // Increase speed
+          updateUI();
+        }
+      }
+
+      // Score increases with every bounce
+      if (ball.body.velocity.x !== 0 && ball.body.velocity.y !== 0) {
+        score++;
+        updateUI();
+      }
+    }
+
+    function updateUI() {
+      document.querySelector('.score').textContent = `Score: ${score}`;
+      document.querySelector('.level').textContent = `Level: ${level}`;
+    }
+
+    function resetGame() {
+      score = 0;
+      level = 1;
+      lives = 3;
+      bounceCount = 0;
+      ball.setPosition(240, 160);
+      ball.setVelocity(150, 150);
+      updateUI();
     }
   </script>
 </body>
